@@ -185,7 +185,13 @@ abstract class AbstractImporter
             $properties = $this->createPropertiesFromValues($properties, $propertiesOld);
             $properties = $this->createPropertiesFromPropertyHelpers($properties, $propertiesOld);
             $properties = $this->genericChanges($properties);
-            $generalRepository->insertRecord($properties, $this->tableName);
+            $recordIsMigrated = $generalRepository->isRecordMigrated($this->tableName, $properties['_migrated_uid']);
+            if($recordIsMigrated) {
+                $generalRepository->updateRecord($properties, $this->tableName);
+            }
+            else {
+                $generalRepository->insertRecord($properties, $this->tableName);
+            }
         }
         $this->executeSqlEnd();
         $this->finalMessage($records);

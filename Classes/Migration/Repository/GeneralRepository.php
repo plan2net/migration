@@ -65,6 +65,20 @@ class GeneralRepository
         return (array)$connection->executeQuery($query)->fetchAll();
     }
 
+    /**
+     * @param string $tableName
+     * @throws DBALException
+     */
+    public function isRecordMigrated(
+        string $tableName,
+        int $oldUid
+    ):bool {
+        $connection = DatabaseUtility::getConnectionForTable($tableName);
+        /** @noinspection SqlNoDataSourceInspection */
+        $query = 'select uid from ' . $tableName . ' where _migrated_uid = ' . $oldUid;
+        return (bool)$connection->executeQuery($query)->fetchOne();
+    }
+
     public function updateRecord(array $properties, string $tableName)
     {
         if (array_key_exists('uid', $properties) === false) {
