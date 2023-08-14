@@ -81,7 +81,7 @@ class GeneralRepository
 
     public function updateRecord(array $properties, string $tableName)
     {
-        if (array_key_exists('uid', $properties) === false) {
+        if (array_key_exists('uid', $properties) === false && array_key_exists('_migrated_uid', $properties) === false) {
             throw new LogicException(
                 'Record of table ' . $tableName . ' needs a uid field for persisting',
                 1568277411
@@ -95,7 +95,12 @@ class GeneralRepository
             );
 
             $connection = DatabaseUtility::getConnectionForTable($tableName);
-            $connection->update($tableName, $properties, ['uid' => (int)$properties['uid']]);
+
+            $uidTarget = (int)$properties['uid'];
+            if($uidTarget === 0) {
+                $uidTarget = $connection->select(['uid'], $tableName, ['_migrated_uid' => $properties['_migrated_uid']])->fetchOne();
+            }
+            $connection->update($tableName, $properties, ['uid' => $uidTarget]);
             $this->log->addMessage('Record updated', $properties, $tableName);
         } else {
             $this->log->addMessage('Record could be inserted', $properties, $tableName);

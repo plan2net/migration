@@ -291,6 +291,7 @@ abstract class AbstractImporter
             $properties['_migrated_table'] = $this->tableNameOld;
         }
         if ($this->keepIdentifiers === false) {
+            $properties['_migrated_uid'] = $properties['uid'];
             unset($properties['uid']);
         }
         return $properties;
